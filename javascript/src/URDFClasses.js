@@ -87,7 +87,9 @@ class URDFJoint extends URDFBase {
                 break;
 
             case 'planar':
-                this.jointValue = new Array(2).fill(0);
+                // Planar joints rotate about their Z axis
+                this.axis = new Vector3(0, 0, 1);
+                this.jointValue = new Array(3).fill(0);
                 break;
 
             case 'floating':
@@ -147,6 +149,11 @@ class URDFJoint extends URDFBase {
     }
 
     /* Public Functions */
+    /**
+     * Set the value or values of this joint
+     * @param {...number} values One value per degree of freedom of the joint
+     * @returns {boolean} Whether the value was updated
+     */
     setJointValue(...values) {
 
         values = values.map(v => parseFloat(v));
@@ -237,9 +244,35 @@ class URDFJoint extends URDFBase {
             }
 
             case 'floating':
-            case 'planar':
                 // TODO: Support these joint types
                 console.warn(`'${ this.jointType }' joint not yet supported`);
+                break;
+            case 'planar':
+                const posX = values[0];
+                const posY = values[1];
+                const rotZ = values[2];
+
+                if (posX == null && posY == null && rotZ == null) return didUpdate;
+                if (posX === this.jointValue[0] && posY === this.jointValue[1] && rotZ === this.jointValue[2]) return didUpdate;
+
+                // If we pass the above guard conditions, then we definitely need to trigger an update.
+                this.matrixWorldNeedsUpdate = true;
+                didUpdate = true;
+                this.jointValue = [posX, posY, rotZ];
+
+                // Respect existing RPY when modifying the position of the X,Y axes
+                this.position.copy(this.origPosition);
+                _tempAxis.copy(new Vector3(1, 0, 0)).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, posX);
+                _tempAxis.copy(new Vector3(0, 1, 0)).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, posY);
+
+                // Apply the rotation DoF about the Z axis
+                this.quaternion
+                    .setFromAxisAngle(this.axis, rotZ)
+                    .premultiply(this.origQuaternion);
+
+                return didUpdate;
 
         }
 
