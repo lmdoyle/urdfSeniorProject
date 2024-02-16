@@ -248,29 +248,40 @@ class URDFJoint extends URDFBase {
                 console.warn(`'${ this.jointType }' joint not yet supported`);
                 break;
             case 'planar':
+                // no-op if all values are identical to existing value
+                // TODO: this generic implementation of this check could be hoisted higher in the function if we want?
+                if (this.jointValue.every((value, index) => values[index] === value)) return didUpdate;
+
+                // Planar joints have three degrees of freedom: X distance, Y distance, and Z rotation.
                 const posX = values[0];
                 const posY = values[1];
                 const rotZ = values[2];
 
-                if (posX == null && posY == null && rotZ == null) return didUpdate;
-                if (posX === this.jointValue[0] && posY === this.jointValue[1] && rotZ === this.jointValue[2]) return didUpdate;
-
-                // If we pass the above guard conditions, then we definitely need to trigger an update.
-                this.matrixWorldNeedsUpdate = true;
-                didUpdate = true;
-                this.jointValue = [posX, posY, rotZ];
-
                 // Respect existing RPY when modifying the position of the X,Y axes
                 this.position.copy(this.origPosition);
-                _tempAxis.copy(new Vector3(1, 0, 0)).applyEuler(this.rotation);
-                this.position.addScaledVector(_tempAxis, posX);
-                _tempAxis.copy(new Vector3(0, 1, 0)).applyEuler(this.rotation);
-                this.position.addScaledVector(_tempAxis, posY);
-
-                // Apply the rotation DoF about the Z axis
-                this.quaternion
-                    .setFromAxisAngle(this.axis, rotZ)
-                    .premultiply(this.origQuaternion);
+                if (!isNaN(posX)) {
+                    _tempAxis.copy(new Vector3(1, 0, 0)).applyEuler(this.rotation);
+                    this.position.addScaledVector(_tempAxis, posX);
+                    this.jointValue[0] = posX;
+                    didUpdate = true;
+                    this.matrixWorldNeedsUpdate = true;
+                }
+                if (!isNaN(posY)) {
+                    _tempAxis.copy(new Vector3(0, 1, 0)).applyEuler(this.rotation);
+                    this.position.addScaledVector(_tempAxis, posY);
+                    this.jointValue[1] = posY;
+                    didUpdate = true;
+                    this.matrixWorldNeedsUpdate = true;
+                }
+                if (!isNaN(rotZ)) {
+                    // Apply the rotation DoF about the Z axis
+                    this.quaternion
+                        .setFromAxisAngle(this.axis, rotZ)
+                        .premultiply(this.origQuaternion);
+                    this.jointValue[2] = rotZ;
+                    didUpdate = true;
+                    this.matrixWorldNeedsUpdate = true;
+                }
 
                 return didUpdate;
 
