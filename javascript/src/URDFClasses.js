@@ -246,7 +246,6 @@ class URDFJoint extends URDFBase {
                 console.warn(`'${ this.jointType }' joint not yet supported`);
                 break;
             case 'planar':
-                // TODO before merge: refactor joint limits to support multi-dof, clamp to limits here before no-op check
                 // no-op if all values are identical to existing value or are null
                 if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
 
