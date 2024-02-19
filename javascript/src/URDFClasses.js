@@ -259,21 +259,21 @@ class URDFJoint extends URDFBase {
 
                 // Respect existing RPY when modifying the position of the X,Y axes
                 this.position.copy(this.origPosition);
-                if (!isNaN(posX)) {
+                if (posX !== null) {
                     _tempAxis.copy(new Vector3(1, 0, 0)).applyEuler(this.rotation);
                     this.position.addScaledVector(_tempAxis, posX);
                     this.jointValue[0] = posX;
                     didUpdate = true;
                     this.matrixWorldNeedsUpdate = true;
                 }
-                if (!isNaN(posY)) {
+                if (posY !== null) {
                     _tempAxis.copy(new Vector3(0, 1, 0)).applyEuler(this.rotation);
                     this.position.addScaledVector(_tempAxis, posY);
                     this.jointValue[1] = posY;
                     didUpdate = true;
                     this.matrixWorldNeedsUpdate = true;
                 }
-                if (!isNaN(rotZ)) {
+                if (rotZ !== null) {
                     // Apply the rotation DoF about the Z axis
                     this.quaternion
                         .setFromAxisAngle(this.axis, rotZ)
