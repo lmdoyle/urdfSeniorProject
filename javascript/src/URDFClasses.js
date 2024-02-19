@@ -278,7 +278,8 @@ class URDFJoint extends URDFBase {
                                 this.jointValue[4],
                                 this.jointValue[5],
                                 'XYZ',
-                            )).premultiply(this.origQuaternion);
+                            ),
+                        ).premultiply(this.origQuaternion);
                         didUpdate = true;
                     }
                 }
