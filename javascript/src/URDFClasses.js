@@ -87,9 +87,7 @@ class URDFJoint extends URDFBase {
                 break;
 
             case 'planar':
-                // Planar joints rotate about their Z axis
-                this.axis = new Vector3(0, 0, 1);
-                this.jointValue = new Array(3).fill(0);
+                this.jointValue = new Array(2).fill(0);
                 break;
 
             case 'floating':
@@ -252,10 +250,9 @@ class URDFJoint extends URDFBase {
                 // no-op if all values are identical to existing value or are null
                 if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
 
-                // Planar joints have three degrees of freedom: X distance, Y distance, and Z rotation.
+                // Planar joints have two degrees of freedom: X distance, Y distance
                 const posX = values[0];
                 const posY = values[1];
-                const rotZ = values[2];
 
                 // Respect existing RPY when modifying the position of the X,Y axes
                 this.position.copy(this.origPosition);
@@ -270,15 +267,6 @@ class URDFJoint extends URDFBase {
                     _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
                     this.position.addScaledVector(_tempAxis, posY);
                     this.jointValue[1] = posY;
-                    didUpdate = true;
-                    this.matrixWorldNeedsUpdate = true;
-                }
-                if (rotZ !== null) {
-                    // Apply the rotation DoF about the Z axis
-                    this.quaternion
-                        .setFromAxisAngle(this.axis, rotZ)
-                        .premultiply(this.origQuaternion);
-                    this.jointValue[2] = rotZ;
                     didUpdate = true;
                     this.matrixWorldNeedsUpdate = true;
                 }
