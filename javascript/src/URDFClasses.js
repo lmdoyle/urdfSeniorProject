@@ -248,9 +248,8 @@ class URDFJoint extends URDFBase {
                 console.warn(`'${ this.jointType }' joint not yet supported`);
                 break;
             case 'planar':
-                // no-op if all values are identical to existing value
-                // TODO: this generic implementation of this check could be hoisted higher in the function if we want?
-                if (this.jointValue.every((value, index) => values[index] === value)) return didUpdate;
+                // no-op if all values are identical to existing value or are null
+                if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
 
                 // Planar joints have three degrees of freedom: X distance, Y distance, and Z rotation.
                 const posX = values[0];
