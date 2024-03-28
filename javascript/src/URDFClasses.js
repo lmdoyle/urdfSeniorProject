@@ -88,7 +88,9 @@ class URDFJoint extends URDFBase {
                 break;
 
             case 'planar':
-                this.jointValue = new Array(2).fill(0);
+                // Planar joints are, 3dof: position XY and rotation Z.
+                this.jointValue = new Array(3).fill(0);
+                this.axis = new Vector3(0, 0, 1);
                 break;
 
             case 'floating':
@@ -292,8 +294,8 @@ class URDFJoint extends URDFBase {
                 // no-op if all values are identical to existing value or are null
                 if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
 
-                // Planar joints have two degrees of freedom: X distance, Y distance
-                const [posX, posY] = values;
+                // Planar joints have three degrees of freedom: X distance, Y distance, Z rotation.
+                const [posX, posY, rotZ] = values;
 
                 // Respect existing RPY when modifying the position of the X,Y axes
                 this.position.copy(this.origPosition);
@@ -304,9 +306,16 @@ class URDFJoint extends URDFBase {
                     didUpdate = true;
                 }
                 if (posY !== null) {
-                    _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
+                    _tempAxis.set(0, 1, 0).applyEuler(this.rotation);
                     this.position.addScaledVector(_tempAxis, posY);
                     this.jointValue[1] = posY;
+                    didUpdate = true;
+                }
+                if (rotZ !== null) {
+                    this.quaternion
+                        .setFromAxisAngle(this.axis, rotZ)
+                        .premultiply(this.origQuaternion);
+                    this.jointValue[2] = rotZ;
                     didUpdate = true;
                 }
 
