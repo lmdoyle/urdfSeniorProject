@@ -250,43 +250,32 @@ class URDFJoint extends URDFBase {
                 // no-op if all values are identical to existing value or are null
                 if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
                 // Floating joints have six degrees of freedom: X, Y, Z, R, P, Y.
-                const [posX, posY, posZ, roll, pitch, yaw] = values;
+                this.jointValue[0] = values[0] !== null ? values[0] : this.jointValue[0];
+                this.jointValue[1] = values[1] !== null ? values[1] : this.jointValue[1];
+                this.jointValue[2] = values[2] !== null ? values[2] : this.jointValue[2];
                 this.position.copy(this.origPosition);
                 // Respect origin RPY when setting position
-                if (posX !== this.jointValue[0] && posX !== null) {
-                    _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
-                    this.position.addScaledVector(_tempAxis, posX);
-                    didUpdate = true;
-                }
-                if (posY !== this.jointValue[1] && posY !== null) {
-                    _tempAxis.set(0, 1, 0).applyEuler(this.rotation);
-                    this.position.addScaledVector(_tempAxis, posY);
-                    didUpdate = true;
-                }
-                if (posZ !== this.jointValue[2] && posZ !== null) {
-                    _tempAxis.set(0, 0, 1).applyEuler(this.rotation);
-                    this.position.addScaledVector(_tempAxis, posZ);
-                    didUpdate = true;
-                }
+                _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, this.jointValue[0]);
+                _tempAxis.set(0, 1, 0).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, this.jointValue[1]);
+                _tempAxis.set(0, 0, 1).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, this.jointValue[2]);
 
-                // Doing the math to set each individual Euler value seemed more awkward than just handling all this in the same case using ternaries.
-                if (roll !== this.jointValue[3] || pitch !== this.jointValue[4] || yaw !== this.jointValue[5]) {
-                    this.jointValue[3] = roll !== null ? roll : this.jointValue[3];
-                    this.jointValue[4] = pitch !== null ? pitch : this.jointValue[4];
-                    this.jointValue[5] = yaw !== null ? yaw : this.jointValue[5];
-                    this.quaternion.setFromEuler(
-                        _tempEuler.set(
-                            this.jointValue[3],
-                            this.jointValue[4],
-                            this.jointValue[5],
-                            'XYZ',
-                        ),
-                    ).premultiply(this.origQuaternion);
-                    didUpdate = true;
-                }
+                this.jointValue[3] = values[3] !== null ? values[3] : this.jointValue[3];
+                this.jointValue[4] = values[4] !== null ? values[4] : this.jointValue[4];
+                this.jointValue[5] = values[5] !== null ? values[5] : this.jointValue[5];
+                this.quaternion.setFromEuler(
+                    _tempEuler.set(
+                        this.jointValue[3],
+                        this.jointValue[4],
+                        this.jointValue[5],
+                        'XYZ',
+                    ),
+                ).premultiply(this.origQuaternion);
 
-                this.matrixWorldNeedsUpdate = didUpdate;
-                return didUpdate;
+                this.matrixWorldNeedsUpdate = true;
+                return true;
             }
 
             case 'planar': {
@@ -294,33 +283,23 @@ class URDFJoint extends URDFBase {
                 // no-op if all values are identical to existing value or are null
                 if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
 
-                // Planar joints have three degrees of freedom: X distance, Y distance, Z rotation.
-                const [posX, posY, rotZ] = values;
+                this.jointValue[0] = values[0] !== null ? values[0] : this.jointValue[0];
+                this.jointValue[1] = values[1] !== null ? values[1] : this.jointValue[1];
+                this.jointValue[2] = values[2] !== null ? values[2] : this.jointValue[2];
 
                 // Respect existing RPY when modifying the position of the X,Y axes
                 this.position.copy(this.origPosition);
-                if (posX !== null) {
-                    _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
-                    this.position.addScaledVector(_tempAxis, posX);
-                    this.jointValue[0] = posX;
-                    didUpdate = true;
-                }
-                if (posY !== null) {
-                    _tempAxis.set(0, 1, 0).applyEuler(this.rotation);
-                    this.position.addScaledVector(_tempAxis, posY);
-                    this.jointValue[1] = posY;
-                    didUpdate = true;
-                }
-                if (rotZ !== null) {
-                    this.quaternion
-                        .setFromAxisAngle(this.axis, rotZ)
-                        .premultiply(this.origQuaternion);
-                    this.jointValue[2] = rotZ;
-                    didUpdate = true;
-                }
 
-                this.matrixWorldNeedsUpdate = didUpdate;
-                return didUpdate;
+                _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, this.jointValue[0]);
+                _tempAxis.set(0, 1, 0).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, this.jointValue[1]);
+                this.quaternion
+                    .setFromAxisAngle(this.axis, this.jointValue[2])
+                    .premultiply(this.origQuaternion);
+
+                this.matrixWorldNeedsUpdate = true;
+                return true;
             }
 
         }
