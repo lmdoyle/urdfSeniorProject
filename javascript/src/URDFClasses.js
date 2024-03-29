@@ -245,52 +245,52 @@ class URDFJoint extends URDFBase {
 
             }
 
-            case 'floating':
+            case 'floating': {
+
                 // no-op if all values are identical to existing value or are null
                 if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
-                // anonymous block scope to prevent variable name clobbering with other cases in the switch
-                {
-                    // Floating joints have six degrees of freedom: X, Y, Z, R, P, Y.
-                    const [posX, posY, posZ, roll, pitch, yaw] = values;
-                    this.position.copy(this.origPosition);
-                    // Respect origin RPY when setting position
-                    if (posX !== this.jointValue[0] && posX !== null) {
-                        _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
-                        this.position.addScaledVector(_tempAxis, posX);
-                        didUpdate = true;
-                    }
-                    if (posY !== this.jointValue[1] && posY !== null) {
-                        _tempAxis.set(0, 1, 0).applyEuler(this.rotation);
-                        this.position.addScaledVector(_tempAxis, posY);
-                        didUpdate = true;
-                    }
-                    if (posZ !== this.jointValue[2] && posZ !== null) {
-                        _tempAxis.set(0, 0, 1).applyEuler(this.rotation);
-                        this.position.addScaledVector(_tempAxis, posZ);
-                        didUpdate = true;
-                    }
+                // Floating joints have six degrees of freedom: X, Y, Z, R, P, Y.
+                const [posX, posY, posZ, roll, pitch, yaw] = values;
+                this.position.copy(this.origPosition);
+                // Respect origin RPY when setting position
+                if (posX !== this.jointValue[0] && posX !== null) {
+                    _tempAxis.set(1, 0, 0).applyEuler(this.rotation);
+                    this.position.addScaledVector(_tempAxis, posX);
+                    didUpdate = true;
+                }
+                if (posY !== this.jointValue[1] && posY !== null) {
+                    _tempAxis.set(0, 1, 0).applyEuler(this.rotation);
+                    this.position.addScaledVector(_tempAxis, posY);
+                    didUpdate = true;
+                }
+                if (posZ !== this.jointValue[2] && posZ !== null) {
+                    _tempAxis.set(0, 0, 1).applyEuler(this.rotation);
+                    this.position.addScaledVector(_tempAxis, posZ);
+                    didUpdate = true;
+                }
 
-                    // Doing the math to set each individual Euler value seemed more awkward than just handling all this in the same case using ternaries.
-                    if (roll !== this.jointValue[3] || pitch !== this.jointValue[4] || yaw !== this.jointValue[5]) {
-                        this.jointValue[3] = roll !== null ? roll : this.jointValue[3];
-                        this.jointValue[4] = pitch !== null ? pitch : this.jointValue[4];
-                        this.jointValue[5] = yaw !== null ? yaw : this.jointValue[5];
-                        this.quaternion.setFromEuler(
-                            _tempEuler.set(
-                                this.jointValue[3],
-                                this.jointValue[4],
-                                this.jointValue[5],
-                                'XYZ',
-                            ),
-                        ).premultiply(this.origQuaternion);
-                        didUpdate = true;
-                    }
+                // Doing the math to set each individual Euler value seemed more awkward than just handling all this in the same case using ternaries.
+                if (roll !== this.jointValue[3] || pitch !== this.jointValue[4] || yaw !== this.jointValue[5]) {
+                    this.jointValue[3] = roll !== null ? roll : this.jointValue[3];
+                    this.jointValue[4] = pitch !== null ? pitch : this.jointValue[4];
+                    this.jointValue[5] = yaw !== null ? yaw : this.jointValue[5];
+                    this.quaternion.setFromEuler(
+                        _tempEuler.set(
+                            this.jointValue[3],
+                            this.jointValue[4],
+                            this.jointValue[5],
+                            'XYZ',
+                        ),
+                    ).premultiply(this.origQuaternion);
+                    didUpdate = true;
                 }
 
                 this.matrixWorldNeedsUpdate = didUpdate;
                 return didUpdate;
+            }
 
-            case 'planar':
+            case 'planar': {
+
                 // no-op if all values are identical to existing value or are null
                 if (this.jointValue.every((value, index) => values[index] === value || values[index] === null)) return didUpdate;
 
@@ -321,6 +321,7 @@ class URDFJoint extends URDFBase {
 
                 this.matrixWorldNeedsUpdate = didUpdate;
                 return didUpdate;
+            }
 
         }
 
