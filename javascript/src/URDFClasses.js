@@ -265,12 +265,12 @@ class URDFJoint extends URDFBase {
                 // Compose transform of joint origin and transform due to joint values
                 _tempOrigTransform.compose(this.origPosition, this.origQuaternion, _tempScale);
                 _tempQuat.setFromEuler(
-                  _tempEuler.set(
-                    this.jointValue[3],
-                    this.jointValue[4],
-                    this.jointValue[5],
-                    'XYZ',
-                  ),
+                    _tempEuler.set(
+                        this.jointValue[3],
+                        this.jointValue[4],
+                        this.jointValue[5],
+                        'XYZ',
+                    ),
                 );
                 _tempPosition.set(this.jointValue[0], this.jointValue[1], this.jointValue[2]);
                 _tempTransform.compose(_tempPosition, _tempQuat, _tempScale);
@@ -295,7 +295,7 @@ class URDFJoint extends URDFBase {
 
                 // Compose transform of joint origin and transform due to joint values
                 _tempOrigTransform.compose(this.origPosition, this.origQuaternion, _tempScale);
-                _tempQuat.setFromAxisAngle(this.axis, this.jointValue[2])
+                _tempQuat.setFromAxisAngle(this.axis, this.jointValue[2]);
                 _tempPosition.set(this.jointValue[0], this.jointValue[1], 0.0);
                 _tempTransform.compose(_tempPosition, _tempQuat, _tempScale);
 
